@@ -1,0 +1,219 @@
+.dashboard-content {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.dashboard-stats.four-col {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.dashboard-table-wrap {
+  overflow-x: auto;
+}
+
+.dashboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.dashboard-table th {
+  text-align: left;
+  padding: 10px 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.dashboard-table td {
+  padding: 12px 12px;
+  color: var(--text);
+  border-bottom: 1px solid var(--bg-warm-2);
+  vertical-align: middle;
+}
+
+.dashboard-table tr {
+  transition: background var(--duration) var(--ease);
+}
+
+.dashboard-table tbody tr:hover {
+  background: var(--bg-warm);
+}
+
+.dashboard-table .muted {
+  color: var(--text-muted);
+}
+
+/* Section header */
+.dashboard-sec-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.dashboard-sec-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.dashboard-btn-new {
+  padding: 7px 16px;
+  background: var(--blue-bg);
+  color: var(--blue);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all var(--duration) var(--ease);
+}
+
+.dashboard-btn-new:hover { background: #d4e8f8; }
+.dashboard-btn-new:active { transform: scale(0.97); }
+
+/* Action links */
+.action-edit {
+  color: var(--blue);
+  cursor: pointer;
+  margin-right: 14px;
+  font-size: 12px;
+  transition: opacity var(--duration) var(--ease);
+}
+.action-edit:hover { opacity: 0.7; }
+
+.action-delete {
+  color: var(--red);
+  cursor: pointer;
+  font-size: 12px;
+  transition: opacity var(--duration) var(--ease);
+}
+.action-delete:hover { opacity: 0.7; }
+
+/* Offer card */
+.offer-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  transition: all var(--duration) var(--ease);
+  gap: 16px;
+}
+
+.offer-card:hover {
+  border-color: #ccc;
+  box-shadow: var(--shadow-sm);
+}
+
+.offer-card-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.offer-card-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.offer-card-btns {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.offer-btn-accept {
+  padding: 7px 16px;
+  background: var(--green-bg);
+  color: var(--green);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all var(--duration) var(--ease);
+}
+.offer-btn-accept:hover { background: #d9ebc6; }
+
+.offer-btn-reject {
+  padding: 7px 16px;
+  background: var(--red-bg);
+  color: var(--red);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all var(--duration) var(--ease);
+}
+.offer-btn-reject:hover { background: #f5d5d5; }
+
+/* Profile form */
+.profile-form {
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-form-row {
+  display: flex;
+  gap: 14px;
+}
+
+.profile-form-row .form-group {
+  flex: 1;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .dashboard-stats.four-col {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-content {
+    padding: 16px;
+  }
+
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-stats.four-col {
+    grid-template-columns: 1fr;
+  }
+
+  .offer-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .offer-card-btns {
+    width: 100%;
+  }
+
+  .offer-btn-accept,
+  .offer-btn-reject {
+    flex: 1;
+    text-align: center;
+  }
+}

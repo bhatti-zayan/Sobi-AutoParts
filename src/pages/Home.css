@@ -1,0 +1,125 @@
+.home-hero {
+  background: linear-gradient(135deg, #E6F1FB 0%, #d4e8f8 40%, #c8e0f5 100%);
+  padding: 40px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.home-hero::before {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(24, 95, 165, 0.05) 0%, transparent 60%);
+  border-radius: 50%;
+}
+
+.home-hero-title {
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--blue);
+  position: relative;
+  z-index: 1;
+  letter-spacing: -0.5px;
+}
+
+.home-hero-sub {
+  font-size: 14px;
+  color: var(--blue);
+  opacity: 0.85;
+  position: relative;
+  z-index: 1;
+}
+
+.home-hero-btns {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.home-hero-btn-white {
+  padding: 10px 24px;
+  background: var(--bg);
+  color: var(--blue);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all var(--duration) var(--ease);
+  box-shadow: var(--shadow-sm);
+}
+
+.home-hero-btn-white:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.home-hero-btn-outline {
+  padding: 10px 24px;
+  background: transparent;
+  color: var(--blue);
+  border: 1px solid var(--blue);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all var(--duration) var(--ease);
+}
+
+.home-hero-btn-outline:hover {
+  background: rgba(24, 95, 165, 0.08);
+}
+
+.home-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+@media (max-width: 1024px) {
+  .home-grid {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .home-grid {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .home-hero {
+    padding: 32px 16px;
+  }
+
+  .home-hero-title {
+    font-size: 22px;
+  }
+
+  .home-hero-btns {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .home-hero-btn-white,
+  .home-hero-btn-outline {
+    width: 100%;
+    text-align: center;
+  }
+}

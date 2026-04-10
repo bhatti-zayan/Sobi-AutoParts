@@ -1,0 +1,102 @@
+.product-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--bg);
+  transition: transform var(--duration) var(--ease), box-shadow var(--duration) var(--ease);
+  cursor: pointer;
+}
+
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lift);
+}
+
+.product-card-img {
+  background: var(--bg-warm);
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.product-card-img-placeholder {
+  width: 72px;
+  height: 72px;
+  background: var(--border);
+  border-radius: var(--radius-sm);
+  opacity: 0.6;
+}
+
+.product-card-body {
+  padding: 14px 16px;
+}
+
+.product-card-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 3px;
+  line-height: 1.3;
+}
+
+.product-card-sub {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.product-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.product-card-price {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.product-card-timer {
+  font-size: 10px;
+  color: var(--red);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+}
+
+.product-card-btn {
+  width: 100%;
+  padding: 9px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all var(--duration) var(--ease);
+  margin-top: 4px;
+}
+
+.product-card-btn:active {
+  transform: scale(0.97);
+}
+
+.product-card-btn.blue { background: var(--blue-bg); color: var(--blue); }
+.product-card-btn.blue:hover { background: #d4e8f8; }
+.product-card-btn.amber { background: var(--amber-bg); color: var(--amber); }
+.product-card-btn.amber:hover { background: #f5e2c4; }
+.product-card-btn.gray { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
+.product-card-btn.gray:hover { background: var(--bg-warm); }
+
+@media (max-width: 768px) {
+  .product-card-img {
+    height: 140px;
+  }
+}
