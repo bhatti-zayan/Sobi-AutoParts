@@ -16,6 +16,7 @@ export default function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    // console.log("form submitted with email:", email);
     setError('');
     const result = login(email, password);
     if (result.success) {
@@ -29,6 +30,7 @@ export default function Login() {
   };
 
   const handleDemoLogin = (role) => {
+    // just for testing purposes, remove before final submission
     const user = demoLogin(role);
     if (user) {
       addToast(`Logged in as ${user.name} (${role})`, 'success');
@@ -40,6 +42,7 @@ export default function Login() {
 
   const handleForgotPassword = () => {
     if (forgotEmail) {
+      // TODO: connect this to backend email service later
       addToast('Password reset link sent to ' + forgotEmail, 'info');
       setShowForgot(false);
       setForgotEmail('');

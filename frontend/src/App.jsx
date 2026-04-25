@@ -13,17 +13,19 @@ import CreateListing from './pages/CreateListing';
 import AdminPanel from './pages/AdminPanel';
 
 function AppRoutes() {
+  // console.log("loading routes");
   return (
     <>
       <Navbar />
       <Routes>
-        {/* Public Routes */}
+        {/* Public */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/product/:id" element={<ProductDetail />} />
+        {/* <Route path="/test" element={<h1>Testing page</h1>} /> */}
 
-        {/* Buyer Routes */}
+        {/* Buyer */}
         <Route
           path="/buyer/dashboard"
           element={
@@ -33,7 +35,7 @@ function AppRoutes() {
           }
         />
 
-        {/* Seller Routes */}
+        {/* Seller*/}
         <Route
           path="/seller/dashboard"
           element={
@@ -51,7 +53,7 @@ function AppRoutes() {
           }
         />
 
-        {/* Admin Routes */}
+        {/* Admin*/}
         <Route
           path="/admin"
           element={
@@ -61,7 +63,7 @@ function AppRoutes() {
           }
         />
 
-        {/* Catch-all */}
+        {/* Redirects to home if wrong url typed */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>
@@ -70,6 +72,7 @@ function AppRoutes() {
 
 export default function App() {
   return (
+    // <BrowserRouter> // changed this
     <BrowserRouter>
       <AuthProvider>
         <ToastProvider>
