@@ -15,5 +15,6 @@ router.put('/products/:id/approve', adminController.approveProduct);
 router.put('/products/:id/reject', adminController.rejectProduct);
 
 router.get('/orders', adminController.getOrders);
+router.get('/activities', adminController.getActivities);
 
 module.exports = router;

@@ -44,6 +44,26 @@ class BuyerController {
       next(error);
     }
   }
+
+  async placeBid(req, res, next) {
+    try {
+      const { productId, amount } = req.body;
+      const product = await buyerService.placeBid(req.user.id, productId, amount);
+      res.status(200).json({ success: true, data: product });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async makeOffer(req, res, next) {
+    try {
+      const { productId, amount } = req.body;
+      const product = await buyerService.makeOffer(req.user.id, productId, amount);
+      res.status(200).json({ success: true, data: product });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new BuyerController();

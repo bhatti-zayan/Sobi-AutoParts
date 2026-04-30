@@ -55,6 +55,15 @@ class AdminController {
       next(error);
     }
   }
+
+  async getActivities(req, res, next) {
+    try {
+      const activities = await adminService.getActivities();
+      res.status(200).json({ success: true, data: activities });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new AdminController();

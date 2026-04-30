@@ -12,5 +12,7 @@ router.use(allowRoles('buyer'));
 
 router.post('/orders', buyerController.placeOrder);
 router.get('/orders', buyerController.getOrders);
+router.post('/bids', buyerController.placeBid);
+router.post('/offers', buyerController.makeOffer);
 
 module.exports = router;

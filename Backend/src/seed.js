@@ -18,7 +18,7 @@ const seedData = async () => {
     await Order.deleteMany();
     await Activity.deleteMany();
 
-    console.log('🗑️ Existing data cleared');
+    console.log(' Existing data cleared');
 
     // 1. Create Users
     const users = await User.insertMany([
@@ -48,7 +48,7 @@ const seedData = async () => {
     const buyer = users[0];
     const seller = users[1];
 
-    console.log('👤 Users seeded');
+    console.log(' Users seeded');
 
     // 2. Create Products
     const products = await Product.insertMany([
@@ -92,7 +92,7 @@ const seedData = async () => {
       }
     ]);
 
-    console.log('📦 Products seeded');
+    console.log(' Products seeded');
 
     // 3. Create Orders (Purchase History)
     await Order.insertMany([
@@ -107,7 +107,7 @@ const seedData = async () => {
       }
     ]);
 
-    console.log('🧾 Orders seeded');
+    console.log(' Orders seeded');
 
     // 4. Create Activities
     await Activity.insertMany([
@@ -116,12 +116,12 @@ const seedData = async () => {
       { text: 'Offer accepted — <b>PKR 1,900</b> for Suzuki Alto Engine Cover', type: 'offer_accepted' }
     ]);
 
-    console.log('📜 Activities seeded');
+    console.log(' Activities seeded');
 
-    console.log('✅ Seeding completed successfully!');
+    console.log(' Seeding completed successfully!');
     process.exit();
   } catch (error) {
-    console.error('❌ Seeding failed:', error.message);
+    console.error(' Seeding failed:', error.message);
     process.exit(1);
   }
 };

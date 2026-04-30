@@ -45,6 +45,16 @@ class SellerController {
       next(error);
     }
   }
+
+  async handleOffer(req, res, next) {
+    try {
+      const { productId, offerId, action } = req.body;
+      const product = await sellerService.handleOffer(req.user.id, productId, offerId, action);
+      res.status(200).json({ success: true, data: product });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 module.exports = new SellerController();

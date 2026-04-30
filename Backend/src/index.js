@@ -5,9 +5,9 @@ const connectDB = require('./config/db');
 const errorHandler = require('./adapters/middleware/errorHandler');
 
 const authRoutes = require('./adapters/http/routes/authRoutes');
-// const buyerRoutes = require('./adapters/http/routes/buyerRoutes');
-// const sellerRoutes = require('./adapters/http/routes/sellerRoutes');
-// const adminRoutes = require('./adapters/http/routes/adminRoutes');
+const buyerRoutes = require('./adapters/http/routes/buyerRoutes');
+const sellerRoutes = require('./adapters/http/routes/sellerRoutes');
+const adminRoutes = require('./adapters/http/routes/adminRoutes');
 
 dotenv.config();
 connectDB();
@@ -19,9 +19,9 @@ app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
-// app.use('/api/buyer', buyerRoutes);
-// app.use('/api/seller', sellerRoutes);
-// app.use('/api/admin', adminRoutes);
+app.use('/api/buyer', buyerRoutes);
+app.use('/api/seller', sellerRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/', (req, res) => {

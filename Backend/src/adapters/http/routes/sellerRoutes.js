@@ -13,5 +13,6 @@ router.put('/products/:id', sellerController.updateProduct);
 router.delete('/products/:id', sellerController.deleteProduct);
 
 router.get('/orders', sellerController.getOrders);
+router.post('/handle-offer', sellerController.handleOffer);
 
 module.exports = router;

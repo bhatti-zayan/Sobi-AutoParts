@@ -15,10 +15,21 @@ const productSchema = new mongoose.Schema({
   startingPrice: { type: Number },
   currentBid: { type: Number },
   auctionEndTime: { type: Date },
+  bids: [{
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    amount: { type: Number },
+    time: { type: Date, default: Date.now }
+  }],
   
   // Bargain specific
   bargainMin: { type: Number },
   bargainMax: { type: Number },
+  offers: [{
+    buyerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    amount: { type: Number },
+    status: { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'pending' },
+    time: { type: Date, default: Date.now }
+  }],
 }, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);
