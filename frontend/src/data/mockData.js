@@ -1,4 +1,4 @@
-// ── Demo Users ──────────────────────────────────────────────
+// Demo Users
 export const demoUsers = {
   buyer: {
     id: 'u1',
@@ -26,7 +26,7 @@ export const demoUsers = {
   },
 };
 
-// ── Product Listings ────────────────────────────────────────
+// Product Listings
 export const products = [
   {
     id: 'p1',
@@ -151,7 +151,7 @@ export const products = [
   },
 ];
 
-// ── Buyer Purchase History ──────────────────────────────────
+// Buyer Purchase History
 export const purchases = [
   {
     id: 'pur1',
@@ -209,7 +209,7 @@ export const buyerOffers = [
   },
 ];
 
-// ── Seller Data ─────────────────────────────────────────────
+// Seller Data
 export const sellerListings = [
   {
     id: 'p1',
@@ -253,7 +253,7 @@ export const sellerOffers = [
   },
 ];
 
-// ── Admin Data ──────────────────────────────────────────────
+// Admin Data
 export const adminStats = {
   totalUsers: 142,
   usersThisWeek: 12,
@@ -301,7 +301,7 @@ export const adminUsers = [
   { id: 'u6', name: 'Ahmed Raza', email: 'ahmed@example.com', role: 'Buyer', status: 'Inactive', joined: '5 Dec 2025' },
 ];
 
-// ── Categories ──────────────────────────────────────────────
+// Categories
 export const categories = [
   'Engine parts',
   'Body & exterior',

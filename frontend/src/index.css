@@ -1,34 +1,34 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-/* ── CSS Variables / Design Tokens ─────────────────────── */
+/* CSS Variables / Design Tokens */
 :root {
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
   /* Neutrals */
   --bg: #ffffff;
-  --bg-warm: #F5F5F3;
-  --bg-warm-2: #F1EFE8;
-  --border: #E0DED6;
-  --text: #1A1A1A;
-  --text-muted: #6B6B6B;
-  --text-placeholder: #9B9B9B;
+  --bg-warm: #f5f5f5;
+  --bg-warm-2: #eeeeee;
+  --border: #e0e0e0;
+  --text: #222222;
+  --text-muted: #666666;
+  --text-placeholder: #999999;
 
   /* Primary – Blue */
-  --blue: #185FA5;
-  --blue-bg: #E6F1FB;
-  --blue-hover: #134d87;
+  --blue: #1a65ac;
+  --blue-bg: #eaf1f8;
+  --blue-hover: #14508a;
 
   /* Success – Green */
-  --green: #3B6D11;
-  --green-bg: #EAF3DE;
+  --green: #3e7513;
+  --green-bg: #edf5e4;
 
-  /* Warning – Amber */
-  --amber: #854F0B;
-  --amber-bg: #FAEEDA;
+  /* Warning – Orange */
+  --amber: #c37f2d;
+  --amber-bg: #fbf2e1;
 
   /* Danger – Red */
-  --red: #A32D2D;
-  --red-bg: #FCEBEB;
+  --red: #a82e2e;
+  --red-bg: #fcebeb;
 
   /* Radius */
   --radius-sm: 8px;
@@ -47,7 +47,7 @@
   --duration: 200ms;
 }
 
-/* ── Reset ─────────────────────────────────────────────── */
+/* Reset */
 *,
 *::before,
 *::after {
@@ -92,7 +92,7 @@ img {
   display: block;
 }
 
-/* ── Utility Classes ───────────────────────────────────── */
+/* Utility Classes */
 
 /* Badges */
 .badge {
@@ -317,7 +317,7 @@ img {
   border-radius: 3px;
 }
 
-/* ── Responsive Breakpoints ────────────────────────────── */
-/* Tablet: max-width 1024px */
-/* Mobile: max-width 768px */
-/* Small: max-width 480px */
+/* Responsive Breakpoints */
+/* Tablet  1024px */
+/* Mobile  768px */
+/* Small  480px */

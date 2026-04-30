@@ -9,9 +9,10 @@ export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   const handleLogout = () => {
+    // console.log("user clicked logout");
     logout();
     navigate('/login');
-    setDrawerOpen(false);
+    setDrawerOpen(false); // hide menu after logout
   };
 
   const getDashboardLink = () => {
@@ -58,6 +59,7 @@ export default function Navbar() {
             type="text"
             placeholder="Search parts, makes, models..."
             id="global-search"
+            // onChange={(e) => console.log(e.target.value)} // TO DO: actually implement search later
           />
         </div>
 

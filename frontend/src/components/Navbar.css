@@ -112,7 +112,7 @@
   white-space: nowrap;
 }
 
-/* ── Hamburger ───────────────────────────────────── */
+/* Hamburger */
 .navbar-hamburger {
   display: none;
   flex-direction: column;
@@ -141,7 +141,7 @@
   transform: rotate(-45deg) translate(4px, -4px);
 }
 
-/* ── Mobile Drawer ───────────────────────────────── */
+/* Mobile Drawer */
 .navbar-drawer {
   display: none;
   position: fixed;
@@ -177,7 +177,7 @@
   font-size: 14px;
 }
 
-/* ── Responsive ──────────────────────────────────── */
+/* Responsive */
 @media (max-width: 768px) {
   .navbar {
     padding: 0 16px;
