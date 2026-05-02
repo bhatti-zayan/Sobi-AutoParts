@@ -52,6 +52,14 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/seller/edit-listing/:id"
+          element={
+            <ProtectedRoute allowedRoles={['seller']}>
+              <CreateListing isEditMode={true} />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Admin*/}
         <Route

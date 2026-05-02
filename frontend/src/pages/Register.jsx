@@ -14,18 +14,20 @@ export default function Register() {
   const { addToast } = useToast();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     if (password.length < 8) {
       setError('Password must be at least 8 characters');
       return;
     }
-    const result = register(name, email, password, role);
+    const result = await register(name, email, password, role);
     if (result.success) {
       addToast(`Welcome, ${result.user.name}! Account created.`, 'success');
       if (role === 'seller') navigate('/seller/dashboard');
       else navigate('/');
+    } else {
+      setError(result.error);
     }
   };
 

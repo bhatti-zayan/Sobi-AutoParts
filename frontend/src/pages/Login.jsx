@@ -14,11 +14,10 @@ export default function Login() {
   const { addToast } = useToast();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // console.log("form submitted with email:", email);
     setError('');
-    const result = login(email, password);
+    const result = await login(email, password);
     if (result.success) {
       addToast(`Welcome back, ${result.user.name}!`, 'success');
       if (result.user.role === 'admin') navigate('/admin');

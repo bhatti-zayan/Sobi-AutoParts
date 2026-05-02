@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { adminStats, adminActivity, adminUsers, sellerListings } from '../data/mockData';
 import './AdminPanel.css';
@@ -8,18 +9,81 @@ const sidebarItems = ['Overview', 'Users', 'Listings', 'Auctions', 'Offers'];
 
 export default function AdminPanel() {
   const [activeSection, setActiveSection] = useState('Overview');
-  const [users, setUsers] = useState(adminUsers);
+  const [users, setUsers] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [listings, setListings] = useState([]);
   const { addToast } = useToast();
+  const { token } = useAuth();
 
-  const toggleUserStatus = (id) => {
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === id
-          ? { ...u, status: u.status === 'Active' ? 'Inactive' : 'Active' }
-          : u
-      )
-    );
-    addToast('User status updated', 'success');
+  const fetchUsers = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/admin/users', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const mappedUsers = data.data.map(u => ({
+          id: u._id,
+          name: u.name,
+          email: u.email,
+          role: u.role.charAt(0).toUpperCase() + u.role.slice(1),
+          status: u.isActive ? 'Active' : 'Inactive',
+          joined: new Date(u.createdAt).toLocaleDateString()
+        }));
+        setUsers(mappedUsers);
+      }
+    } catch (err) {
+      console.error('Failed to fetch users', err);
+    }
+  };
+
+  const fetchActivities = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/admin/activities', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) setActivities(data.data);
+    } catch (err) {}
+  };
+
+  const fetchListings = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/admin/products', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) setListings(data.data);
+    } catch (err) {}
+  };
+
+  useEffect(() => {
+    if (activeSection === 'Users') fetchUsers();
+    if (activeSection === 'Overview') fetchActivities();
+    if (activeSection === 'Listings') fetchListings();
+  }, [activeSection]);
+
+  const toggleUserStatus = async (id, currentStatus) => {
+    try {
+      const newStatus = currentStatus !== 'Active';
+      const res = await fetch(`http://localhost:5000/api/admin/users/${id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ isActive: newStatus })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        addToast('User status updated', 'success');
+        fetchUsers();
+      } else {
+        addToast(data.message || 'Error updating status', 'error');
+      }
+    } catch (err) {
+      addToast('Network error', 'error');
+    }
   };
 
   return (
@@ -71,13 +135,13 @@ export default function AdminPanel() {
 
               <div className="admin-sec-title">Recent activity</div>
               <div className="admin-activity-list">
-                {adminActivity.map((a) => (
-                  <div className="admin-activity-item" key={a.id}>
+                {activities.map((a) => (
+                  <div className="admin-activity-item" key={a._id || a.id}>
                     <span
                       className="admin-activity-text"
                       dangerouslySetInnerHTML={{ __html: a.text }}
                     ></span>
-                    <span className="admin-activity-time">{a.time}</span>
+                    <span className="admin-activity-time">{new Date(a.createdAt).toLocaleString()}</span>
                   </div>
                 ))}
               </div>
@@ -112,7 +176,7 @@ export default function AdminPanel() {
                           <div className="admin-user-actions">
                             <button
                               className={`admin-btn-toggle ${u.status === 'Active' ? 'deactivate' : 'activate'}`}
-                              onClick={() => toggleUserStatus(u.id)}
+                              onClick={() => toggleUserStatus(u.id, u.status)}
                             >
                               {u.status === 'Active' ? 'Deactivate' : 'Activate'}
                             </button>
@@ -142,12 +206,12 @@ export default function AdminPanel() {
                     </tr>
                   </thead>
                   <tbody>
-                    {sellerListings.map((l) => (
-                      <tr key={l.id}>
-                        <td>{l.product}</td>
+                    {listings.map((l) => (
+                      <tr key={l.id || l._id}>
+                        <td>{l.title}</td>
                         <td><span className={`badge ${l.type === 'fixed' ? 'badge-fixed' : l.type === 'auction' ? 'badge-auction' : 'badge-bargain'}`}>{l.type.charAt(0).toUpperCase() + l.type.slice(1)}</span></td>
-                        <td>PKR {l.price.toLocaleString()}</td>
-                        <td><span className={`badge ${l.status === 'Live' ? 'badge-live' : 'badge-pending'}`}>{l.status}</span></td>
+                        <td>PKR {(l.price || l.currentBid || l.startingPrice || 0).toLocaleString()}</td>
+                        <td><span className={`badge ${l.status === 'live' ? 'badge-live' : 'badge-pending'}`}>{l.status}</span></td>
                         <td>
                           <span className="action-edit">View</span>
                           <span className="action-delete" onClick={() => addToast('Listing removed', 'info')}>Remove</span>

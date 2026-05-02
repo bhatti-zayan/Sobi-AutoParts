@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { sellerListings, sellerOffers } from '../data/mockData';
+import { sellerListings, sellerOffers, products } from '../data/mockData';
 import TabBar from '../components/TabBar';
 import './Dashboard.css';
 
@@ -10,33 +10,111 @@ const tabs = ['My listings', 'Offer inbox', 'Auctions', 'Profile'];
 
 export default function SellerDashboard() {
   const [activeTab, setActiveTab] = useState('My listings');
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, token } = useAuth();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
-  const [listings, setListings] = useState(sellerListings);
+  const [listings, setListings] = useState([]);
   const [offers, setOffers] = useState(sellerOffers);
+  const [realOrders, setRealOrders] = useState([]);
+
+  useEffect(() => {
+    const fetchSellerData = async () => {
+      try {
+        const [prodRes, ordRes] = await Promise.all([
+          fetch('http://localhost:5000/api/seller/products', { headers: { Authorization: `Bearer ${token}` } }),
+          fetch('http://localhost:5000/api/seller/orders', { headers: { Authorization: `Bearer ${token}` } })
+        ]);
+        const prodData = await prodRes.json();
+        const ordData = await ordRes.json();
+        if (prodRes.ok && prodData.success) setListings(prodData.data);
+        if (ordRes.ok && ordData.success) setRealOrders(ordData.data);
+      } catch (err) {
+        console.error('Failed to fetch seller data');
+      }
+    };
+    if (token) fetchSellerData();
+  }, [token]);
   const [profileName, setProfileName] = useState(user?.name || '');
   const [profileEmail, setProfileEmail] = useState(user?.email || '');
+  const [profilePhone, setProfilePhone] = useState(user?.phone || '');
 
-  const handleDelete = (id) => {
-    setListings((prev) => prev.filter((l) => l.id !== id));
-    addToast('Listing deleted', 'info');
+  const handleDelete = async (id) => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/seller/products/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        setListings((prev) => prev.filter((l) => l.id !== id));
+        addToast('Listing deleted', 'info');
+      } else {
+        const data = await res.json();
+        addToast(data.message || 'Failed to delete listing', 'error');
+      }
+    } catch (err) {
+      addToast('Network error', 'error');
+    }
   };
 
-  const handleAcceptOffer = (id) => {
-    setOffers((prev) => prev.map((o) => o.id === id ? { ...o, status: 'accepted' } : o));
-    addToast('Offer accepted!', 'success');
+  const handleAcceptOffer = async (offer) => {
+    try {
+      const res = await fetch('http://localhost:5000/api/seller/handle-offer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ productId: offer.productId || offer.id, offerId: offer.id, action: 'accept' })
+      });
+      if (res.ok) {
+        setOffers((prev) => prev.map((o) => o.id === offer.id ? { ...o, status: 'accepted' } : o));
+        addToast('Offer accepted!', 'success');
+      } else {
+        const data = await res.json();
+        addToast(data.message || 'Failed to accept offer', 'error');
+      }
+    } catch (err) {
+      addToast('Network error', 'error');
+    }
   };
 
-  const handleRejectOffer = (id) => {
-    setOffers((prev) => prev.map((o) => o.id === id ? { ...o, status: 'rejected' } : o));
-    addToast('Offer rejected', 'info');
+  const handleRejectOffer = async (offer) => {
+    try {
+      const res = await fetch('http://localhost:5000/api/seller/handle-offer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ productId: offer.productId || offer.id, offerId: offer.id, action: 'reject' })
+      });
+      if (res.ok) {
+        setOffers((prev) => prev.map((o) => o.id === offer.id ? { ...o, status: 'rejected' } : o));
+        addToast('Offer rejected', 'info');
+      } else {
+        const data = await res.json();
+        addToast(data.message || 'Failed to reject offer', 'error');
+      }
+    } catch (err) {
+      addToast('Network error', 'error');
+    }
   };
 
-  const handleProfileSave = () => {
-    updateProfile({ name: profileName, email: profileEmail });
-    addToast('Profile updated!', 'success');
+  const handleProfileSave = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ name: profileName, email: profileEmail, phone: profilePhone })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        updateProfile({ name: data.user.name, email: data.user.email, phone: data.user.phone, initials: data.user.initials });
+        addToast('Profile updated successfully', 'success');
+      } else {
+        addToast(data.message || 'Failed to update profile', 'error');
+      }
+    } catch (err) {
+      addToast('Network error', 'error');
+    }
   };
 
   const getBadgeClass = (type) => {
@@ -70,7 +148,7 @@ export default function SellerDashboard() {
           </div>
           <div className="stat-card">
             <div className="stat-label">Total sales</div>
-            <div className="stat-value green">14</div>
+            <div className="stat-value green">{realOrders.length}</div>
           </div>
         </div>
 
@@ -95,18 +173,39 @@ export default function SellerDashboard() {
                   </tr>
                 </thead>
                 <tbody>
-                  {listings.map((l) => (
-                    <tr key={l.id}>
-                      <td>{l.product}</td>
-                      <td><span className={`badge ${getBadgeClass(l.type)}`}>{l.type.charAt(0).toUpperCase() + l.type.slice(1)}</span></td>
-                      <td>PKR {l.price.toLocaleString()}</td>
-                      <td><span className={`badge ${getStatusBadge(l.status)}`}>{l.status}</span></td>
-                      <td>
-                        <span className="action-edit" onClick={() => navigate('/seller/create-listing')}>Edit</span>
-                        <span className="action-delete" onClick={() => handleDelete(l.id)}>Delete</span>
-                      </td>
-                    </tr>
-                  ))}
+                  {listings.map((l) => {
+                    const fullProduct = l;
+                    const hasBidsOrAcceptedOffers = fullProduct && (
+                      (fullProduct.bids && fullProduct.bids.length > 0) ||
+                      (fullProduct.offers && fullProduct.offers.some(o => o.status === 'accepted'))
+                    );
+                    
+                    return (
+                      <tr key={l.id}>
+                        <td>{l.title}</td>
+                        <td><span className={`badge ${getBadgeClass(l.type)}`}>{l.type.charAt(0).toUpperCase() + l.type.slice(1)}</span></td>
+                        <td>
+                          {l.type === 'fixed' && `PKR ${l.price.toLocaleString()}`}
+                          {l.type === 'auction' && (
+                            <div>
+                              <div>PKR {(fullProduct?.currentBid || fullProduct?.startingPrice || 0).toLocaleString()}</div>
+                              <div style={{fontSize:'11px', color:'var(--red, #e74c3c)'}}>{fullProduct?.auctionEndsIn || 'Ends soon'}</div>
+                            </div>
+                          )}
+                          {l.type === 'bargain' && `PKR ${fullProduct?.bargainMin?.toLocaleString()} - ${fullProduct?.bargainMax?.toLocaleString()}`}
+                        </td>
+                        <td><span className={`badge ${getStatusBadge(l.status)}`}>{l.status}</span></td>
+                        <td>
+                          <span className="action-edit" onClick={() => navigate(`/seller/edit-listing/${l.id}`)}>Edit</span>
+                          {hasBidsOrAcceptedOffers ? (
+                            <span className="action-delete" style={{ opacity: 0.5, cursor: 'not-allowed' }} title="Cannot delete a listing with active bids or accepted offers">Delete</span>
+                          ) : (
+                            <span className="action-delete" onClick={() => handleDelete(l.id)}>Delete</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -127,8 +226,8 @@ export default function SellerDashboard() {
                 </div>
                 {o.status === 'pending' ? (
                   <div className="offer-card-btns">
-                    <button className="offer-btn-accept" onClick={() => handleAcceptOffer(o.id)}>Accept</button>
-                    <button className="offer-btn-reject" onClick={() => handleRejectOffer(o.id)}>Reject</button>
+                    <button className="offer-btn-accept" onClick={() => handleAcceptOffer(o)}>Accept</button>
+                    <button className="offer-btn-reject" onClick={() => handleRejectOffer(o)}>Reject</button>
                   </div>
                 ) : (
                   <span className={`badge ${o.status === 'accepted' ? 'badge-completed' : 'badge-outbid'}`}>
@@ -190,6 +289,16 @@ export default function SellerDashboard() {
                   <label className="form-label">Email</label>
                   <input className="form-input" value={profileEmail} onChange={(e) => setProfileEmail(e.target.value)} id="seller-profile-email" />
                 </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Phone number</label>
+                <input
+                  className="form-input"
+                  placeholder="e.g. +92 300 1234567"
+                  value={profilePhone}
+                  onChange={(e) => setProfilePhone(e.target.value)}
+                  id="seller-profile-phone"
+                />
               </div>
               <div className="form-group">
                 <label className="form-label">Role</label>

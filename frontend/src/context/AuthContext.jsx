@@ -2,20 +2,30 @@ import { createContext, useContext, useReducer, useCallback } from 'react';
 import { demoUsers } from '../data/mockData';
 
 const AuthContext = createContext(null);
+const storedToken = localStorage.getItem('token');
+const storedUser = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
 
 const initialState = {
-  user: null,
-  isAuthenticated: false,
+  user: storedUser,
+  token: storedToken,
+  isAuthenticated: !!storedToken,
 };
 
 function authReducer(state, action) {
   switch (action.type) {
     case 'LOGIN':
-      return { user: action.payload, isAuthenticated: true };
+      localStorage.setItem('token', action.payload.token);
+      localStorage.setItem('user', JSON.stringify(action.payload.user));
+      return { user: action.payload.user, token: action.payload.token, isAuthenticated: true };
     case 'LOGOUT':
-      return { user: null, isAuthenticated: false };
-    case 'UPDATE_PROFILE':
-      return { ...state, user: { ...state.user, ...action.payload } };
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      return { user: null, token: null, isAuthenticated: false };
+    case 'UPDATE_PROFILE': {
+      const updatedUser = { ...state.user, ...action.payload };
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      return { ...state, user: updatedUser };
+    }
     default:
       return state;
   }
@@ -24,16 +34,22 @@ function authReducer(state, action) {
 export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  const login = useCallback((email, password) => {
-    const user = Object.values(demoUsers).find(
-      (u) => u.email === email && u.password === password
-    );
-    if (user) {
-      const { password: _, ...safeUser } = user;
-      dispatch({ type: 'LOGIN', payload: safeUser });
-      return { success: true, user: safeUser };
+  const login = useCallback(async (email, password) => {
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        dispatch({ type: 'LOGIN', payload: { user: data.user, token: data.token } });
+        return { success: true, user: data.user };
+      }
+      return { success: false, error: data.message || 'Invalid credentials' };
+    } catch (err) {
+      return { success: false, error: 'Network error. Backend might be down.' };
     }
-    return { success: false, error: 'Invalid email or password' };
   }, []);
 
   const demoLogin = useCallback((role) => {
@@ -45,22 +61,22 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const register = useCallback((name, email, password, role) => {
-    const initials = name
-      .split(' ')
-      .map((n) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-    const newUser = {
-      id: 'u' + Date.now(),
-      name,
-      email,
-      role,
-      initials,
-    };
-    dispatch({ type: 'LOGIN', payload: newUser });
-    return { success: true, user: newUser };
+  const register = useCallback(async (name, email, password, role) => {
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password, role })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        dispatch({ type: 'LOGIN', payload: { user: data.user, token: data.token } });
+        return { success: true, user: data.user };
+      }
+      return { success: false, error: data.message || 'Registration failed' };
+    } catch (err) {
+      return { success: false, error: 'Network error. Backend might be down.' };
+    }
   }, []);
 
   const logout = useCallback(() => {

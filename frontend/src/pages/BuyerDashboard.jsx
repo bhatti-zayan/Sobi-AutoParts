@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { purchases, buyerBids, buyerOffers } from '../data/mockData';
@@ -9,15 +9,80 @@ const tabs = ['Purchases', 'My bids', 'My offers', 'Profile'];
 
 export default function BuyerDashboard() {
   const [activeTab, setActiveTab] = useState('Purchases');
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, token } = useAuth();
   const { addToast } = useToast();
+
+  const [localBids, setLocalBids] = useState([]);
+  const [realPurchases, setRealPurchases] = useState([]);
+  const [realOffers, setRealOffers] = useState([]);
+
+  useEffect(() => {
+    const fetchBuyerData = async () => {
+      try {
+        const [ordRes, bidRes, offRes] = await Promise.all([
+          fetch('http://localhost:5000/api/buyer/orders', { headers: { Authorization: `Bearer ${token}` } }),
+          fetch('http://localhost:5000/api/buyer/bids', { headers: { Authorization: `Bearer ${token}` } }),
+          fetch('http://localhost:5000/api/buyer/offers', { headers: { Authorization: `Bearer ${token}` } })
+        ]);
+        const ordData = await ordRes.json();
+        const bidData = await bidRes.json();
+        const offData = await offRes.json();
+        if (ordRes.ok && ordData.success) setRealPurchases(ordData.data);
+        if (bidRes.ok && bidData.success) setLocalBids(bidData.data);
+        if (offRes.ok && offData.success) setRealOffers(offData.data);
+      } catch (err) {
+        console.error('Failed to fetch buyer data');
+      }
+    };
+    if (token) fetchBuyerData();
+  }, [token]);
+
+  const handleCompletePurchase = async (bid) => {
+    try {
+      const res = await fetch('http://localhost:5000/api/buyer/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ productId: bid.productId || bid.id, method: 'auction', amount: bid.yourBid }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        addToast(data.message || 'Purchase failed', 'error');
+        return;
+      }
+      addToast('Purchase completed successfully!', 'success');
+      setLocalBids(prev => prev.map(b => b.id === bid.id ? { ...b, purchased: true } : b));
+    } catch (err) {
+      addToast('Could not connect to server', 'error');
+    }
+  };
 
   const [profileName, setProfileName] = useState(user?.name || '');
   const [profileEmail, setProfileEmail] = useState(user?.email || '');
+  const [profilePhone, setProfilePhone] = useState(user?.phone || '');
 
-  const handleProfileSave = () => {
-    updateProfile({ name: profileName, email: profileEmail });
-    addToast('Profile updated!', 'success');
+  const handleProfileSave = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ name: profileName, email: profileEmail, phone: profilePhone })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        updateProfile({ name: data.user.name, email: data.user.email, phone: data.user.phone, initials: data.user.initials });
+        addToast('Profile updated successfully', 'success');
+      } else {
+        addToast(data.message || 'Failed to update profile', 'error');
+      }
+    } catch (err) {
+      addToast('Network error', 'error');
+    }
   };
 
   const getBadgeClass = (method) => {
@@ -40,15 +105,15 @@ export default function BuyerDashboard() {
         <div className="dashboard-stats" id="buyer-stats">
           <div className="stat-card">
             <div className="stat-label">Total purchases</div>
-            <div className="stat-value">{purchases.length + 4}</div>
+            <div className="stat-value">{realPurchases.length}</div>
           </div>
           <div className="stat-card">
             <div className="stat-label">Active bids</div>
-            <div className="stat-value warn">{buyerBids.length}</div>
+            <div className="stat-value warn">{localBids.length}</div>
           </div>
           <div className="stat-card">
             <div className="stat-label">Pending offers</div>
-            <div className="stat-value info">{buyerOffers.length}</div>
+            <div className="stat-value info">{realOffers.length}</div>
           </div>
         </div>
 
@@ -66,13 +131,13 @@ export default function BuyerDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {purchases.map((p) => (
+                {realPurchases.map((p) => (
                   <tr key={p.id}>
-                    <td>{p.item}</td>
+                    <td>{p.productName}</td>
                     <td><span className={`badge ${getBadgeClass(p.method)}`}>{getBadgeText(p.method)}</span></td>
                     <td>PKR {p.amount.toLocaleString()}</td>
-                    <td className="muted">{p.date}</td>
-                    <td><span className="badge badge-completed">{p.status}</span></td>
+                    <td className="muted">{new Date(p.createdAt).toLocaleDateString()}</td>
+                    <td><span className="badge badge-completed">Completed</span></td>
                   </tr>
                 ))}
               </tbody>
@@ -94,16 +159,24 @@ export default function BuyerDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {buyerBids.map((b) => (
+                {localBids.map((b) => (
                   <tr key={b.id}>
                     <td>{b.item}</td>
                     <td>PKR {b.yourBid.toLocaleString()}</td>
                     <td>PKR {b.currentBid.toLocaleString()}</td>
                     <td className="muted">{b.endsIn}</td>
                     <td>
-                      <span className={`badge ${b.status === 'Winning' ? 'badge-winning' : 'badge-outbid'}`}>
-                        {b.status}
-                      </span>
+                      {b.status.toLowerCase() === 'won' ? (
+                        b.purchased ? (
+                          <button className="btn btn-primary" disabled style={{ padding: '6px 14px', fontSize: '13px', opacity: 0.7 }}>Purchased ✓</button>
+                        ) : (
+                          <button className="btn btn-primary" onClick={() => handleCompletePurchase(b)} style={{ padding: '6px 14px', fontSize: '13px' }}>You Won! Complete Purchase</button>
+                        )
+                      ) : (
+                        <span className={`badge ${b.status === 'Winning' ? 'badge-winning' : 'badge-outbid'}`}>
+                          {b.status}
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -126,13 +199,29 @@ export default function BuyerDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {buyerOffers.map((o) => (
+                {realOffers.map((o) => (
                   <tr key={o.id}>
                     <td>{o.item}</td>
                     <td>PKR {o.offered.toLocaleString()}</td>
                     <td className="muted">PKR {o.listed.toLocaleString()}</td>
                     <td className="muted">{o.time}</td>
-                    <td><span className="badge badge-pending">{o.status}</span></td>
+                    <td>
+                      {o.status.toLowerCase() === 'accepted' && (
+                        <span className="badge badge-completed" style={{ color: 'var(--green, #2ecc71)', borderColor: 'var(--green, #2ecc71)' }}>Offer Accepted ✓</span>
+                      )}
+                      {o.status.toLowerCase() === 'rejected' && (
+                        <span className="badge badge-outbid" style={{ color: 'var(--red, #e74c3c)', borderColor: 'var(--red, #e74c3c)' }}>Offer Rejected ✗</span>
+                      )}
+                      {o.status.toLowerCase() === 'rejected_other' && (
+                        <div>
+                          <span className="badge badge-outbid" style={{ color: 'var(--red, #e74c3c)', borderColor: 'var(--red, #e74c3c)' }}>Offer Rejected ✗</span>
+                          <div style={{ fontSize: '11px', color: 'var(--text-placeholder)', marginTop: '4px' }}>Another offer was accepted for this listing.</div>
+                        </div>
+                      )}
+                      {o.status.toLowerCase() === 'pending' && (
+                        <span className="badge badge-pending" style={{ color: 'var(--amber, #f39c12)' }}>Pending...</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -164,6 +253,16 @@ export default function BuyerDashboard() {
                     id="profile-email"
                   />
                 </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Phone number</label>
+                <input
+                  className="form-input"
+                  placeholder="e.g. +92 300 1234567"
+                  value={profilePhone}
+                  onChange={(e) => setProfilePhone(e.target.value)}
+                  id="profile-phone"
+                />
               </div>
               <div className="form-group">
                 <label className="form-label">Role</label>
