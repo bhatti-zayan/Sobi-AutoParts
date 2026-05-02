@@ -3,10 +3,12 @@ const buyerService = require('../../../application/buyerService');
 class BuyerController {
   async getProducts(req, res, next) {
     try {
-      console.log('🔍 Fetching all products...');
-      const products = await buyerService.getAllProducts();
-      console.log(`✅ Found ${products.length} products`);
-      res.status(200).json({ success: true, data: products });
+      const result = await buyerService.getAllProducts(req.query);
+      if (Array.isArray(result)) {
+        res.status(200).json({ success: true, data: result });
+      } else {
+        res.status(200).json({ success: true, ...result });
+      }
     } catch (error) {
       next(error);
     }
@@ -14,9 +16,7 @@ class BuyerController {
 
   async getProduct(req, res, next) {
     try {
-      console.log(`🔍 Fetching product with ID: ${req.params.id}`);
       const product = await buyerService.getProductById(req.params.id);
-      console.log(`✅ Product found: ${product.title}`);
       res.status(200).json({ success: true, data: product });
     } catch (error) {
       next(error);
@@ -25,9 +25,7 @@ class BuyerController {
 
   async placeOrder(req, res, next) {
     try {
-      console.log(`🛒 Placing order for user ${req.user.id}...`);
       const order = await buyerService.placeOrder(req.user.id, req.body);
-      console.log(`✅ Order created successfully: ${order._id}`);
       res.status(201).json({ success: true, data: order });
     } catch (error) {
       next(error);
@@ -36,9 +34,7 @@ class BuyerController {
 
   async getOrders(req, res, next) {
     try {
-      console.log(`📜 Fetching order history for user ${req.user.id}...`);
       const orders = await buyerService.getOrderHistory(req.user.id);
-      console.log(`✅ Found ${orders.length} orders in history`);
       res.status(200).json({ success: true, data: orders });
     } catch (error) {
       next(error);
@@ -60,6 +56,24 @@ class BuyerController {
       const { productId, amount } = req.body;
       const product = await buyerService.makeOffer(req.user.id, productId, amount);
       res.status(200).json({ success: true, data: product });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getBids(req, res, next) {
+    try {
+      const bids = await buyerService.getMyBids(req.user.id);
+      res.status(200).json({ success: true, data: bids });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getOffers(req, res, next) {
+    try {
+      const offers = await buyerService.getMyOffers(req.user.id);
+      res.status(200).json({ success: true, data: offers });
     } catch (error) {
       next(error);
     }

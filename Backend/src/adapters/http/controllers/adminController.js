@@ -12,6 +12,9 @@ class AdminController {
 
   async updateUserStatus(req, res, next) {
     try {
+      if (req.user.id === req.params.id) {
+        return res.status(403).json({ success: false, message: 'Admins cannot deactivate their own account.' });
+      }
       const { isActive } = req.body;
       const user = await adminService.updateUserStatus(req.params.id, isActive);
       res.status(200).json({ success: true, data: user });

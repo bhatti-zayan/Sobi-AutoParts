@@ -14,5 +14,7 @@ router.post('/orders', buyerController.placeOrder);
 router.get('/orders', buyerController.getOrders);
 router.post('/bids', buyerController.placeBid);
 router.post('/offers', buyerController.makeOffer);
+router.get('/bids', buyerController.getBids);
+router.get('/offers', buyerController.getOffers);
 
 module.exports = router;

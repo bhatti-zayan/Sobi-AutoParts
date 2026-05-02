@@ -12,6 +12,9 @@ const adminRoutes = require('./adapters/http/routes/adminRoutes');
 dotenv.config();
 connectDB();
 
+const startCronJobs = require('./cronJobs');
+startCronJobs();
+
 const app = express();
 
 app.use(cors());

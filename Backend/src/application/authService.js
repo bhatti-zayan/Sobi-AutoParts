@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const UserEntity = require('../domain/User');
+const bcrypt = require('bcryptjs');
 
 // In a stricter Hexagonal setup, this repository would be injected.
 // For student-level simplicity, we are requiring the specific adapter directly here,
@@ -8,8 +9,15 @@ const userRepository = require('../adapters/database/repositories/MongoUserRepos
 
 class AuthService {
   async register(userData) {
+    // 0. Block admin self-registration
+    if (userData.role === 'admin') {
+      throw { statusCode: 400, message: 'Admin accounts cannot be created via registration.' };
+    }
+
     // 1. Core business logic using Domain Entity
-    const userToCreate = new UserEntity(userData);
+    // Hash the password before creating the user entity
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+    const userToCreate = new UserEntity({ ...userData, password: hashedPassword });
     
     // 2. Check if user exists using the Port (implemented by MongoAdapter)
     const existingUser = await userRepository.findByEmail(userToCreate.email);
@@ -26,7 +34,8 @@ class AuthService {
   async login(email, password) {
     const user = await userRepository.findByEmail(email);
     
-    if (!user || user.password !== password) {
+    const passwordMatches = user && await bcrypt.compare(password, user.password);
+    if (!user || !passwordMatches) {
       throw { statusCode: 401, message: 'Invalid credentials' };
     }
     
@@ -37,11 +46,24 @@ class AuthService {
 
     return this.generateToken(user);
   }
+
+  async updateProfile(userId, profileData) {
+    const allowedUpdates = {};
+    if (profileData.name) allowedUpdates.name = profileData.name;
+    if (profileData.email) allowedUpdates.email = profileData.email;
+    if (profileData.phone) allowedUpdates.phone = profileData.phone;
+    
+    const updatedUser = await userRepository.updateProfile(userId, allowedUpdates);
+    return this.generateToken(updatedUser);
+  }
   
   generateToken(user) {
     // Safe payload (no password)
-    const payload = { id: user.id, name: user.name, email: user.email, role: user.role, initials: user.initials };
-    const token = jwt.sign(payload, process.env.JWT_SECRET || 'secret', { expiresIn: '30d' });
+    const payload = { id: user.id, name: user.name, email: user.email, role: user.role, initials: user.initials, phone: user.phone };
+    if (!process.env.JWT_SECRET) {
+      throw new Error('JWT_SECRET is not defined in the environment variables');
+    }
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30d' });
     return { user: payload, token };
   }
 }

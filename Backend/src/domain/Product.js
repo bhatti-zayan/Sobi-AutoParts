@@ -1,7 +1,7 @@
 class Product {
   constructor({
     id, title, subtitle, description, category, condition,
-    price, type, sellerId, status = 'live',
+    price, type, sellerId, sellerName, sellerInitials, status = 'live', images = [],
     startingPrice, currentBid, auctionEndTime, bids = [],
     bargainMin, bargainMax, offers = [],
     createdAt,
@@ -15,7 +15,10 @@ class Product {
     this.price = price;
     this.type = type;
     this.sellerId = sellerId;
+    this.sellerName = sellerName;
+    this.sellerInitials = sellerInitials;
     this.status = status;
+    this.images = images;
     this.startingPrice = startingPrice;
     this.currentBid = currentBid;
     this.auctionEndTime = auctionEndTime;

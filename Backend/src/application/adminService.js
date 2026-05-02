@@ -9,7 +9,34 @@ class AdminService {
   }
 
   async updateUserStatus(userId, isActive) {
-    return await userRepository.updateStatus(userId, isActive);
+    const user = await userRepository.updateStatus(userId, isActive);
+    
+    const ProductModel = require('../adapters/database/models/ProductModel');
+    if (!isActive) {
+      if (user.role === 'seller') {
+        await ProductModel.updateMany(
+          { sellerId: userId, status: 'live' },
+          { $set: { status: 'suspended' } }
+        );
+      } else if (user.role === 'buyer') {
+        // Void all active bids for this buyer
+        await ProductModel.updateMany(
+          { 'bids.user': userId, status: 'live' },
+          { $pull: { bids: { user: userId } } }
+        );
+      }
+      await activityService.log(`User ${user.name} deactivated. Listings/bids suspended.`, 'user_deactivation', userId);
+    } else {
+      if (user.role === 'seller') {
+        await ProductModel.updateMany(
+          { sellerId: userId, status: 'suspended' },
+          { $set: { status: 'live' } }
+        );
+      }
+      await activityService.log(`User ${user.name} reactivated. Listings restored.`, 'new_listing', userId);
+    }
+    
+    return user;
   }
 
   async getAllProducts() {

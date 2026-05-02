@@ -9,7 +9,8 @@ const productSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   type: { type: String, enum: ['fixed', 'auction', 'bargain'], required: true },
   sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  status: { type: String, enum: ['live', 'sold', 'removed'], default: 'live' },
+  status: { type: String, enum: ['live', 'sold', 'removed', 'suspended'], default: 'live' },
+  images: [{ type: String }],
   
   // Auction specific
   startingPrice: { type: Number },
@@ -18,6 +19,7 @@ const productSchema = new mongoose.Schema({
   bids: [{
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     amount: { type: Number },
+    status: { type: String, enum: ['won', 'lost', 'pending'], default: 'pending' },
     time: { type: Date, default: Date.now }
   }],
   
@@ -27,7 +29,7 @@ const productSchema = new mongoose.Schema({
   offers: [{
     buyerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     amount: { type: Number },
-    status: { type: String, enum: ['pending', 'accepted', 'rejected'], default: 'pending' },
+    status: { type: String, enum: ['pending', 'accepted', 'rejected', 'rejected_other'], default: 'pending' },
     time: { type: Date, default: Date.now }
   }],
 }, { timestamps: true });

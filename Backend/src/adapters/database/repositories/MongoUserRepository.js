@@ -20,6 +20,7 @@ class MongoUserRepository extends IUserRepository {
       role: doc.role,
       initials: doc.initials,
       isActive: doc.isActive,
+      phone: doc.phone,
       createdAt: doc.createdAt
     });
   }
@@ -41,6 +42,7 @@ class MongoUserRepository extends IUserRepository {
       password: userEntity.password,
       role: userEntity.role,
       initials: userEntity.initials,
+      phone: userEntity.phone,
       isActive: userEntity.isActive
     });
     const savedDoc = await userDoc.save();
@@ -49,6 +51,19 @@ class MongoUserRepository extends IUserRepository {
 
   async updateStatus(id, isActive) {
     const updatedDoc = await UserModel.findByIdAndUpdate(id, { isActive }, { new: true }).select('-password');
+    return this._mapToEntity(updatedDoc);
+  }
+
+  async updateProfile(id, profileData) {
+    if (profileData.name) {
+      const parts = profileData.name.trim().split(' ');
+      let initials = parts[0][0].toUpperCase();
+      if (parts.length > 1) {
+        initials += parts[parts.length - 1][0].toUpperCase();
+      }
+      profileData.initials = initials;
+    }
+    const updatedDoc = await UserModel.findByIdAndUpdate(id, profileData, { new: true }).select('-password');
     return this._mapToEntity(updatedDoc);
   }
 

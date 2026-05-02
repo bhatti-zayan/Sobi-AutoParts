@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+const bcrypt = require('bcryptjs');
 const User = require('./adapters/database/models/UserModel');
 const Product = require('./adapters/database/models/ProductModel');
 const Order = require('./adapters/database/models/OrderModel');
